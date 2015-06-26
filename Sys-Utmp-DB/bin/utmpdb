@@ -1,0 +1,84 @@
+#! /usr/bin/env perl
+
+package main;
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin" . "/../lib";
+
+use Sys::Utmp::DB;
+use Sys::Utmp::Processor;
+
+sub usage_exit;
+sub main;
+
+sub usage_exit {
+
+	(my $app = $0) =~ s:.*/::;
+
+	print "usage: $app db cmd args\n";
+	print "  where 'db cmd args' is one of:\n";
+	print "    - dbfile create\n";
+	print "    - dbfile insert host wtmpfile [...]\n";
+	print "  and:\n";
+	print "    - dbfile: is the database file path\n";
+	print "    - host: the hostname for the following wtmpfile\n";
+	print "    - wtmpfile: is a file path containing wtmp(5) data\n";
+
+#	print "    insert filename key value\n";
+#	print "    update filename key value\n";
+#	print "    query filename [key]\n";
+
+	exit 0;
+
+}
+
+sub main {
+
+        my $file = shift or usage_exit;
+        my $act = shift;
+        $act = '' unless $act;
+
+	if($act eq 'create') {
+		my $utdb = Sys::Utmp::DB->new($file) or exit $!;
+		exit $utdb->createdb();
+	}
+	elsif ($act eq 'insert') { 
+
+		# todo: loadutmp(host,path) ? 
+
+		my $utdb = Sys::Utmp::DB->new($file) or exit $!;
+		my $proc = Sys::Utmp::Processor->new();
+
+		$utdb->begintxn();
+
+		while(my($host,$file) = @_) {
+
+			shift @_; shift @_;
+			
+			print "# $host => $file\n";
+			$proc->open($file);
+
+			while(my $rec = $proc->next()) {
+				$rec->{host} = $host;
+				$utdb->insertrec($rec);
+			}
+
+		}
+
+		$utdb->endtxn();
+	}
+	else {
+		usage_exit;
+	}
+
+}
+
+main @ARGV;
+
+1;
+__DATA__
+
+
