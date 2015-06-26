@@ -1,0 +1,125 @@
+#! /usr/bin/env perl
+
+# Sys::Utmp test
+#
+# $Id$
+#
+# BSD utmp notes
+# --------------
+#
+# Tested against OpenBSD 5.6 which has a traditional 4.4BSD utmp(5).
+#
+# - all records are $utent->user_process() == 1
+# - have to call 'new,utmpname,setutent' to properly select an alternate file.
+#
+# Basically, as can be seen from the last(1) output in the __DATA__ 
+# section of the file and the utmp(5) page:
+#
+#   - user login records are created when users login
+#   - logout timestamps are created when users logout
+#   - shutdown records are created on clean shutdown
+#   - reboot records are created on system startup
+#
+# Therefore, user records can show:
+#
+#   - active login
+#   - normal login/logout duration
+#   - login interrupted by scheduled reboot (-shutdown)
+#   - login interrupted by unscheduled reboot (-crash)
+#
+# and so actual logged-in time can be interpolated.
+#
+
+use Sys::Utmp;
+use YAML;
+
+sub printtime {
+	my $timet = shift;
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                localtime($timet);
+
+        return sprintf "%04d-%02d-%02d %02d:%02d:%02d",
+                (${year}+1900),(${mon}+1),${mday},${hour},${min},${sec};
+}
+
+
+sub dodump {
+	my $path = shift;
+
+	print "# dumping path: $path\n";
+
+	my $utmp = Sys::Utmp->new();
+	$utmp->utmpname($path);
+	$utmp->setutent();
+
+	while ( my $utent =  $utmp->getutent() ) {
+
+		$user = $utent->ut_user();
+		$id = $utent->ut_id();
+		$line = $utent->ut_line();
+		$pid = $utent->ut_pid();
+		$type = $utent->ut_type();
+		$host = $utent->ut_host();
+		$time = $utent->ut_time();
+
+		my $printall = sub {
+			print "---\n";
+			print "user: $user\n";
+			print "id: $id\n";
+			print "line: $line\n";
+			print "pid: $pid\n";
+			print "type: $type\n";
+			print "host: $host\n";
+			print "time: $time\n";
+		};
+
+		my $printbsd = sub {
+			print "---\n";
+			print "line: $line\n";
+			print "user: $user\n";
+			print "host: $host\n";
+			print "time: " . printtime($time) . "\n";
+		};
+
+		my $printer = $printbsd;
+		$printer->();
+
+	}
+	$utmp->endutent;
+}
+
+if(scalar @ARGV < 1) {
+	dodump ("/var/log/wtmp");
+}
+else {
+	foreach (@ARGV) { 
+		dodump($_);
+	}
+
+}
+
+1;
+__DATA__
+
+$ last -c -f wtmp-ob56-wreboot  
+root      tty00                             Mon Apr 20 15:49 - 15:49  (00:00)
+reboot    ~                                 Mon Apr 20 15:49
+root      tty00                             Mon Apr 20 15:45 - crash  (00:03)
+reboot    ~                                 Mon Apr 20 15:44
+reboot    ~                                 Mon Apr 20 15:39
+root      ttyC0                             Mon Apr 20 12:15 - 12:20  (00:05)
+reboot    ~                                 Mon Apr 20 12:15
+shutdown  ~                                 Mon Apr 20 12:13
+root      ttyC0                             Mon Apr 20 12:12 - shutdown  (00:01)
+root      ttyp1    owl1a.test.ece.rice.edu  Fri Mar 20 15:24 - 15:40  (00:16)
+root      ttyp1    owl1a.test.ece.rice.edu  Fri Mar 20 13:48 - 14:58  (01:09)
+root      ttyp1    owl1a.test.ece.rice.edu  Thu Mar 19 16:45 - 16:45  (00:00)
+root      ttyp1    owl1a.test.ece.rice.edu  Tue Mar 17 16:47 - 18:01  (01:13)
+root      ttyp1    owl1a.test.ece.rice.edu  Tue Mar 17 16:42 - 16:42  (00:00)
+root      ttyp1    owl1a.test.ece.rice.edu  Tue Mar 17 14:38 - 14:38  (00:00)
+root      ttyp1    owl1a.test.ece.rice.edu  Tue Mar 17 14:38 - 14:38  (00:00)
+root      ttyp0    owl1a.test.ece.rice.edu  Tue Mar 17 13:56 - 11:00 (7+21:03)
+root      ttyp0    owl1a.test.ece.rice.edu  Tue Mar 17 13:55 - 13:56  (00:01)
+
+Total time: 7 days, 23:56
+

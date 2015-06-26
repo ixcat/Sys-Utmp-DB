@@ -1,0 +1,54 @@
+#! /usr/bin/env perl
+
+# doutmp: process(ish) utmp file
+
+package main;
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin" . "/../lib";
+
+use Sys::Utmp;
+use Sys::Utmp::Processor;
+
+sub dodump;
+sub printtime;
+
+sub printtime {
+	my $timet = shift;
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                localtime($timet);
+
+        return sprintf "%04d-%02d-%02d %02d:%02d:%02d",
+                (${year}+1900),(${mon}+1),${mday},${hour},${min},${sec};
+}
+
+sub dodump {
+	my $file = shift;
+	my $proc = Sys::Utmp::Processor->new();
+	$proc->open($file);
+	while(my $rec = $proc->next()) {
+		# user line in out type
+		printf "%-16s %-8s %s %s %s\n",
+			$rec->{user},
+			$rec->{line},
+			printtime($rec->{in}),
+			printtime($rec->{out}),
+			$rec->{type};
+	}
+}
+
+if(scalar @ARGV < 1) {
+	dodump ("/var/log/wtmp");
+}
+else {
+	foreach (@ARGV) { 
+		dodump($_);
+	}
+
+}
+
+1;
+

@@ -1,0 +1,14 @@
+@comment $OpenBSD: PLIST,v 1.4 2014/07/12 19:39:49 giovanni Exp $
+@comment ${P5ARCH}/auto/JSON/XS/XS.bs
+${P5ARCH}/
+${P5ARCH}/Sys/
+${P5ARCH}/Sys/Utmp/
+${P5ARCH}/Sys/Utmp.pm
+${P5ARCH}/Sys/Utmp/Utent.pm
+${P5ARCH}/auto/
+${P5ARCH}/auto/Sys/
+${P5ARCH}/auto/Sys/Utmp/
+${P5ARCH}/auto/Sys/Utmp/Utmp.bs
+${P5ARCH}/auto/Sys/Utmp/Utmp.so
+@man man/man3p/Sys::Utmp.3p
+@man man/man3p/Sys::Utmp::Utent.3p

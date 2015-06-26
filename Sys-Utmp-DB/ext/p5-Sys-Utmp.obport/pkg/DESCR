@@ -1,0 +1,4 @@
+Sys::Utmp provides a vaguely object oriented interface to the Unix
+user accounting file (/var/run/utmp).  Whilst it would prefer to
+use the getutent() function from the systems C libraries it will
+attempt to provide its own if they are missing.

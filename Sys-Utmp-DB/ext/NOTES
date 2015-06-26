@@ -1,0 +1,4 @@
+Sys-Utmp built on both ob and el
+User-Utmp did not
+User-Utmp contains utmpx processing logic
+  solaris has no legacy utmp
