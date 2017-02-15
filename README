@@ -14,7 +14,7 @@ installation:
 
 usage:
 
-  bin/utmpdb : actual application; run with no arguments for synopsys
-  bin/utmpdmp : low-level Sys::Utmp dump
-  bin/utmpproc : high-level synthetic record dump
+  utmpdb : actual application; run with no arguments for synopsys
+  utmpdmp : low-level Sys::Utmp dump
+  utmpproc : high-level synthetic record dump
 
