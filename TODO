@@ -1,0 +1,34 @@
+
+Dev Notes
+=========
+
+Developed on OpenBSD and RHEL7.
+
+comparison/testing of various utmp file processing perl mods
+------------------------------------------------------------
+
+(Sys-Utmp-1.7 vs User-Utmp-1.8)
+
+Sys-Utmp-1.7 : builds on ob
+User-Utmp-1.8 : has package for el, fails ob build
+
+Todo
+----
+
+  - review wtmp rotation on deployed hosts
+
+    RHEL logrotate.conf keeps some copies, so *mostly* have records..
+
+  - make comprehensive 'fetcher' logic to get all available wtmps
+
+Later
+=====
+
+  - other platforms - e.g. Solaris:
+    solaris needs utmpx, which is not covered in current Sys::Utmp..
+    is covered on User::Utmp, but again, this doesn't build on ob..
+
+    so, 1) fix ob & port perl stuffs or 2) add utmpx to Sys::Utmp
+
+    for now, ignoring.
+

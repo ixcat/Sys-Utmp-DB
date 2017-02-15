@@ -1,44 +1,20 @@
-comparison/testing of various utmp file processing perl mods
 
-(Sys-Utmp-1.7 vs User-Utmp-1.8)
+Sys-Utmp-DB: utmp(5)/wtmp(5) high-level parser & SQLite DB
 
-Sys-Utmp-1.7 : build on ob
-User-Utmp-1.8 : has package for el, fails ob build
+Requires Sys::Utmp and DBD::SQLite.
 
-after dealing with 'sys utm', and seeing user-utmp fail -
-thinking it best to just postprocess 'last' output.. 
+Interprets Sys::Utmp records (e.g. synthesizes login records from raw data)
+and loads into a simple SQLite database table.
 
-so, previous efforts in 'utmpraw' dir
-and current ones in 'lastparse' dir
+installation:
 
-misc todo:
+  perl Makefile.PL
+  make
+  make install
 
-  - review wtmp rotation on deployed hosts
+usage:
 
-    el5 logrotate.conf keeps 1x copy if log > 1m ..
-    so *mostly* have records..
-
-    todo:
-
-      - fix rotation appropriately (stop rotation for now?)
-      - make comprehensive 'fetcher' logic to get all available wtmps
-
-        ... is sudo comprehensive.. is a script - should bmakeify..
-
-  - create wtmp login db gizmomabob
-
-Later
-=====
-
-Solaris Hosts
--------------
-  - determine method to deal with unusual hosts e.g. solaris9
-    solaris needs utmpx, which is not covered in current Sys::Utmp..
-    is covered on User::Utmp, but this doesn't build on ob..
-
-    so, 1) fix ob & port perl stuffs or 2) add utmpx to Sys::Utmp
-
-    for now, ignoring, since solaris is all merenyi machines,
-    which in turn are actually 'stat', and so shouldn't be in 
-    global ece statistics...
+  bin/utmpdb : actual application; run with no arguments for synopsys
+  bin/utmpdmp : low-level Sys::Utmp dump
+  bin/utmpproc : high-level synthetic record dump
 
